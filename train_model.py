@@ -1,26 +1,27 @@
 import pandas as pd
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error
 import joblib
-import os
 
-# Dummy dataset for testing
-data = {
-    'budget': [100, 150, 200, 120, 300],
-    'runtime': [90, 110, 150, 100, 130],
-    'rating': [6.5, 7.0, 8.0, 6.8, 7.9]
-}
-df = pd.DataFrame(data)
+# Load data
+df = pd.read_csv('merged_dataset.csv')
 
-X = df[['budget', 'runtime']]
+# Preprocess data
+X = df.drop(['rating'], axis=1)
 y = df['rating']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-model = LinearRegression()
+# Train model
+model = RandomForestRegressor(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
-os.makedirs('model', exist_ok=True)
-joblib.dump(model, 'model/movie_rating_model.pkl')
+# Evaluate model
+y_pred = model.predict(X_test)
+mae = mean_absolute_error(y_test, y_pred)
+print(f'MAE: {mae:.2f}')
 
-print("✅ Model trained and saved to model/movie_rating_model.pkl")
+# Save model
+joblib.dump(model, 'movie_rating_model.pkl')

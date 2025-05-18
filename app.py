@@ -1,19 +1,17 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, jsonify
 import joblib
-import numpy as np
 
 app = Flask(__name__)
-model = joblib.load("model/movie_rating_model.pkl")
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+# Load model
+model = joblib.load('movie_rating_model()')
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    features = [float(x) for x in request.form.values()]
-    prediction = model.predict([features])
-    return render_template('index.html', prediction_text=f'Predicted Rating: {prediction[0]:.2f}')
+    data = request.get_json()
+    features = [data['feature1'], data['feature2'], ...]
+    prediction = model.predict([features])[0]
+    return jsonify({'predicted_rating': prediction})
 
 if __name__ == '__main__':
     app.run(debug=True)
